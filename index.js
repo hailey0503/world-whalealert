@@ -3,6 +3,7 @@ const ethers = require("ethers");
 const winston = require("./winston.js");
 const { userClient } = require("./twitterClient.js");
 const { sendMessage } = require("./telegram.js");
+const { discordClient } = require("./discord.js");
 const fs = require("fs");
 
 const result = JSON.parse(fs.readFileSync("./data/accountLabels.json"));
@@ -36,7 +37,7 @@ async function main() {
       const value = amount;
       const txHash = event.transactionHash; //event tx -> console.log
       console.log("txhash", txHash);
-      const whaleThreshold = ethers.utils.parseEther("50000");
+      const whaleThreshold = ethers.utils.parseEther("500000");
       console.log("thres", whaleThreshold);
       console.log(whaleThreshold < value);
 
@@ -56,7 +57,8 @@ async function main() {
 
         const tweetPromise = tweet(message);
         const telegramPromise = telegram(message);
-        await Promise.all([tweetPromise, telegramPromise]);
+        const discordPromise = discord(message)
+        await Promise.all([tweetPromise, telegramPromise, discordPromise]);
       }
     } catch (e) {
       winston.error(e);
@@ -87,6 +89,13 @@ async function tweet(arg) {
   }
 }
 async function telegram(arg) {
+  try {
+    await sendMessage(arg);
+  } catch (e) {
+    console.error(e);
+  }
+}
+async function discord(arg) { //need to update
   try {
     await sendMessage(arg);
   } catch (e) {
