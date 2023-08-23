@@ -21,8 +21,7 @@ jobs:
       run: docker login -u haileythegooner -p $DOCKER_PASSWORD
 
     - name: Build the Docker image
-      run: docker build -t world-whalealert v1 . 
-    - name: tag the Docker image
-      run: docker tag haileythegooner/world-whalealert:v1 haileythegooner/world-whalealert:latest
+      run: docker build -t world-whalealert . 
+  
     - name: Push to Docker hub
       run: docker push haileythegooner/world-whalealert:latest
