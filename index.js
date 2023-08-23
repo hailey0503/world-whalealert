@@ -3,7 +3,7 @@ const ethers = require("ethers");
 const winston = require("./winston.js");
 const { userClient } = require("./twitterClient.js");
 const { sendMessage } = require("./telegram.js");
-const { discordClient } = require("./discord.js");
+const { discordClient, sendDiscordMessage } = require("./discord.js");
 const fs = require("fs");
 
 const result = JSON.parse(fs.readFileSync("./data/accountLabels.json"));
@@ -36,13 +36,13 @@ async function main() {
     try {
       const value = amount;
       const txHash = event.transactionHash; //event tx -> console.log
-      console.log("txhash", txHash);
+      winston.debug("txhash", txHash);
       const whaleThreshold = ethers.utils.parseEther("500000");
-      console.log("thres", whaleThreshold);
-      console.log(whaleThreshold < value);
+      winston.debug("thres", whaleThreshold);
+      winston.debug(whaleThreshold < value);
 
       if (value.gte(whaleThreshold)) {
-        console.log("in");
+        winston.debug("gte in");
         const fromAddress = from;
         const toAddress = to;
         //console.log('from to',fromAddress, toAddress)
@@ -56,23 +56,24 @@ async function main() {
         )} #WLD is transfered to ${walletToName} from ${walletFromName} ${link}`;
 
         const tweetPromise = tweet(message);
-        const telegramPromise = telegram(message);
+        //const telegramPromise = telegram(message);
         const discordPromise = discord(message)
-        await Promise.all([tweetPromise, telegramPromise, discordPromise]);
+        winston.debug('line 61')
+        await Promise.all([tweetPromise, discordPromise]);
       }
     } catch (e) {
-      winston.error(e);
+      winston.error("line 65", e);
     }
   });
 }
 
 function getWalletInfo(address, result) {
-  console.log("getwallet");
+  winston.debug("getwallet");
 
   const addressShort = address.slice(0, 7) + "..." + address.slice(37, 42);
-  console.log("short", addressShort);
+  winston.debug("short", addressShort);
 
-  console.log("result", result[address]);
+  winston.debug("result", result[address]);
   const walletName = addressShort;
   if (result[address]) {
     walletName = result[address].name;
@@ -89,16 +90,20 @@ async function tweet(arg) {
   }
 }
 async function telegram(arg) {
+  winston.debug("telegram in")
   try {
     await sendMessage(arg);
   } catch (e) {
+    winston.debug("telegram e")
     console.error(e);
   }
 }
 async function discord(arg) { //need to update
+  winston.debug("discord in")
   try {
-    await sendMessage(arg);
+    await sendDiscordMessage(arg);
   } catch (e) {
+    winston.debug("discord e")
     console.error(e);
   }
 }
