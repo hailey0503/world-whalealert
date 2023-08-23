@@ -22,5 +22,7 @@ jobs:
 
     - name: Build the Docker image
       run: docker build -t world-whalealert . 
+    - name: tag the Docker image
+      run: docker tag v-1 haileythegooner/world-whalealert
     - name: Push to Docker hub
       run: docker push haileythegooner/world-whalealert:latest
