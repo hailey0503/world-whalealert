@@ -16,7 +16,32 @@ jobs:
     - name: Pull Docker image
       run: sudo docker pull haileythegooner/world-whalealert:latest
     - name: Delete old Docker container
-      run: sudo docker rm -f world-whalealert-container || true
+      run: sudo docker rm -f world-whalealert-container || true 
+    - name: Generate Environment Variable File for production  
+      run: | 
+        steps:
+          echo "DISCORD_URL=$DISCORD_URL" >> .env.production
+          echo "APP_KEY=$APP_KEY" >> .env.production
+          env:
+            DISCORD_URL: ${{secrets.DISCORD_URL}}
+            WSETHURL: ${{secrets.WSETHURL}}
+            WLDAPI: ${{secrets.WLDAPI}}
+            APP_KEY: ${{secrets.APP_KEY}}
+            APP_SECRET: ${{secrets.APP_SECRET}}
+            BEARER_TOKEN: ${{secrets.BEARER_TOKEN}}
+            ACCESS_TOKEN: ${{secrets.ACCESS_TOKEN}}
+            ACCESS_SECRET: ${{secrets.ACCESS_SECRET}}
+            CLIENT_ID: ${{secrets.CLIENT_ID}} 
+            CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
+            TELEGRAM_TOKEN: ${{secrets.TELEGRAM_TOKEN}}
+            NGROK_SEVER_URL: ${{secrets.NGROK_SEVER_URL}}
+            DISCORD_APP_ID: ${{secrets.DISCORD_APP_ID}}
+            DISCORD_PUBLIC_KEY: ${{secrets.DISCORD_PUBLIC_KEY}}
+            DISCORD_URL: ${{secrets.DISCORD_URL}}
+            DISCORD_TOKEN: ${{secrets.DISCORD_TOKEN}}
+            DISCORD_SERVERID: ${{secrets.DISCORD_SERVERID}}
+            PORT: ${{secrets.PORT}}
+            ngrokauth: ${{secrets.NGROKAUTH}}
     - name: Run Docker Container
       run: sudo docker run -d -p 8080:8080 --name world-whalealert-container haileythegooner/world-whalealert
       

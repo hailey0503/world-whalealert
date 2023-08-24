@@ -10,7 +10,7 @@ const result = JSON.parse(fs.readFileSync("./data/accountLabels.json"));
 //console.log(result)
 
 async function main() {
-  const wsETHUrl = process.env.wsETHUrl;
+  const wsETHUrl = process.env.WSETHURL;
   winston.warn(wsETHUrl);
   const networkId = 1;
 
@@ -37,7 +37,7 @@ async function main() {
       const value = amount;
       const txHash = event.transactionHash; //event tx -> console.log
       winston.debug("txhash", txHash);
-      const whaleThreshold = ethers.utils.parseEther("5");
+      const whaleThreshold = ethers.utils.parseEther("500000");
       winston.debug("thres", whaleThreshold);
       winston.debug(whaleThreshold < value);
 
