@@ -1,4 +1,4 @@
-name: Docker Image CI
+name: CI Pipeline
 
 on:
   push:
@@ -18,9 +18,11 @@ jobs:
       env:
         DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
         DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-      run: docker login -u haileythegooner -p DOCKER_PASSWORD
+      run: docker login -u haileythegooner -p $DOCKER_PASSWORD
 
     - name: Build the Docker image
       run: docker build -t world-whalealert . 
     - name: Push to Docker hub
       run: docker push haileythegooner/world-whalealert:latest
+
+
