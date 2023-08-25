@@ -37,7 +37,7 @@ async function main() {
       const value = amount;
       const txHash = event.transactionHash; //event tx -> console.log
       winston.debug("txhash", txHash);
-      const whaleThreshold = ethers.utils.parseEther("5");
+      const whaleThreshold = ethers.utils.parseEther("50000");
       winston.debug("thres", whaleThreshold);
       winston.debug(whaleThreshold < value);
 
@@ -56,10 +56,10 @@ async function main() {
         )} #WLD is transfered to ${walletToName} from ${walletFromName} ${link}`;
 
         const tweetPromise = tweet(message);
-        //const telegramPromise = telegram(message);
+        const telegramPromise = telegram(message);
         const discordPromise = discord(message)
         winston.debug('line 61')
-        await Promise.all([tweetPromise, discordPromise]);
+        await Promise.all([tweetPromise, telegramPromise, discordPromise]);
       }
     } catch (e) {
       winston.error("line 65", e);
