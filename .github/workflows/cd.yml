@@ -30,6 +30,7 @@ jobs:
         echo "TELEGRAM_TOKEN=$TELEGRAM_TOKEN" >> .env.production
         echo "NGROK_SEVER_URL=$NGROK_SEVER_URL" >> .env.production
       env:
+        DISCORD_WEBHOOK_URL: ${{secrets.DISCORD_WEBHOOK_URL}}
         DISCORD_URL: ${{secrets.DISCORD_URL}}
         WSETHURL: ${{secrets.WSETHURL}}
         WLDAPI: ${{secrets.WLDAPI}}
@@ -50,11 +51,9 @@ jobs:
         ngrokauth: ${{secrets.NGROKAUTH}}
     - name: Run Docker Container
       env:
-        discordURL: ${{secrets.DISCORD_URL}}
-
+        DISCORD_WEBHOOK_URL: ${{secrets.DISCORD_WEBHOOK_URL}}
         wsETHUrl: ${{secrets.WSETHURL}}
         WLDAPI: ${{secrets.WLDAPI}}
-
         APP_KEY: ${{secrets.APP_KEY}}
         APP_SECRET: ${{secrets.APP_SECRET}}
         BEARER_TOKEN: ${{secrets.BEARER_TOKEN}}
@@ -62,8 +61,6 @@ jobs:
         ACCESS_SECRET: ${{secrets.ACCESS_SECRET}}
         CLIENT_ID: ${{secrets.CLIENT_ID}} 
         CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
-
-
         TELEGRAM_TOKEN: ${{secrets.TELEGRAM_TOKEN}}
         NGROK_SEVER_URL: ${{secrets.NGROK_SEVER_URL}}
 
