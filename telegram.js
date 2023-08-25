@@ -8,7 +8,7 @@ const TELEGRAM_API=`https://api.telegram.org/bot${TELEGRAM_TOKEN}`
 const URI = `/webhook/${TELEGRAM_TOKEN}`
 const WEBHOOK_URL = NGROK_SEVER_URL+URI
 
-//https://api.telegram.org/bot6169350077:AAF5hGysKgc1lEwrBERrd6FqtdregpbRziM/getUpdates  -> find chat id (must be starting with -100)
+
 const sendMessage = async (text) => {
 	const response = await fetch(`${TELEGRAM_API}/sendMessage`, {
 		method: "POST",

@@ -24,6 +24,7 @@ jobs:
         echo "DISCORD_PUBLIC_KEY" >> .env.production
         echo "DISCORD_URL=$DISCORD_URL" >> .env.production
         echo "DISCORD_TOKEN=$DISCORD_TOKEN" >> .env.production
+        echo "DISCORD_CHANNELID" >> .env.production
 
         echo "WSETHURL=$WSETHURL" >> .env.production
 
@@ -43,6 +44,7 @@ jobs:
         DISCORD_PUBLIC_KEY: ${{secrets.DISCORD_PUBLIC_KEY}}
         DISCORD_URL: ${{secrets.DISCORD_URL}}
         DISCORD_TOKEN: ${{secrets.DISCORD_TOKEN}}
+        DISCORD_CHANNELID : ${{secrets.DISCORD_CHANNELID}}
 
         WSETHURL: ${{secrets.WSETHURL}}
       
@@ -67,6 +69,7 @@ jobs:
         DISCORD_PUBLIC_KEY: ${{secrets.DISCORD_PUBLIC_KEY}}
         DISCORD_URL: ${{secrets.DISCORD_URL}}
         DISCORD_TOKEN: ${{secrets.DISCORD_TOKEN}}
+        DISCORD_CHANNELID: ${{secrets.DISCORD_CHANNELID}}
         
         wsETHUrl: ${{secrets.WSETHURL}}
     
