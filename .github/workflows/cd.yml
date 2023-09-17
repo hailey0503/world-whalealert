@@ -86,6 +86,6 @@ jobs:
         NGROK_SEVER_URL: ${{secrets.NGROK_SEVER_URL}}
 
   
-      run: sudo docker run --env-file ./env.production -d -p 8080:8080 --name world-whalealert-container haileythegooner/world-whalealert
+      run: sudo docker run --env-file ./.env.production -d -p 8080:8080 --name world-whalealert-container haileythegooner/world-whalealert
      
       
