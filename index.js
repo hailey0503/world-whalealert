@@ -37,7 +37,7 @@ async function main() {
       const value = amount;
       const txHash = event.transactionHash; //event tx -> console.log
       winston.debug("txhash", txHash);
-      const whaleThreshold = ethers.utils.parseEther("5");
+      const whaleThreshold = ethers.utils.parseEther("50000");
       winston.debug("thres", whaleThreshold);
       winston.debug(whaleThreshold < value);
 
