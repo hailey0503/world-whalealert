@@ -1,5 +1,7 @@
 FROM node:latest
 
+
+
 # Create app directory
 WORKDIR /repos/whaleAlert
 

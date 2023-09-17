@@ -14,7 +14,7 @@ async function main() {
   winston.warn(wsETHUrl);
   const networkId = 1;
 
-  const provider = new ethers.providers.WebSocketProvider(wsETHUrl, networkId);
+  const provider = new ethers.providers.WebSocketProvider(wsETHUrl, networkId); //setting up a WebSocket connection to an Ethereum node.
   winston.warn("17")
 
   const abi = [
@@ -31,7 +31,7 @@ async function main() {
   ];
   const wldAddress = "0x163f8C2467924be0ae7B5347228CABF260318753";
   const erc20 = new ethers.Contract(wldAddress, abi, provider);
-
+  //sets up an event listener for the "Transfer" event of the ERC-20 token contract.
   erc20.on("Transfer", async (from, to, amount, event) => {
     try {
       const value = amount;
