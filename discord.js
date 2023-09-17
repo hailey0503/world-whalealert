@@ -6,6 +6,8 @@ let channel;
 discordClient.on("ready", (x) => {
 	console.log(`${x.user.tag} is ready!`);
 	channel = discordClient.channels.cache.get(process.env.DISCORD_CHANNELID);
+	console.log('channelID',process.env.DISCORD_CHANNELID)
+	console.log('channel', channel)
 	discordClient.user.setActivity('Subscribe to worldWhaleAlert');
 })
 
