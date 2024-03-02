@@ -13,18 +13,17 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Login Dockerhub
-        env:
-          DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
-          DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-        
-        run: docker login -u haileythegooner -p $DOCKER_PASSWORD
+    - uses: actions/checkout@v3
+    - name: Login Dockerhub
+      env:
+        DOCKER_USERNAME: ${{secrets.DOCKER_USERNAME}}
+        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+      
+      run: docker login -u haileythegooner -p $DOCKER_PASSWORD
 
-      - name: Build the Docker image
-        run: docker build -t haileythegooner/world-whalealert . 
-    
-      - name: Push to Docker hub
-        run: docker push haileythegooner/world-whalealert:latest
-
+    - name: Build the Docker image
+      run: docker build -t haileythegooner/world-whalealert . 
+  
+    - name: Push to Docker hub
+      run: docker push haileythegooner/world-whalealert:latest
 

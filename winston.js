@@ -89,7 +89,7 @@ logger.log({
 	},
 	error: new Error()
   });
-  */
+*/  
 
 // create a stream object with a 'write' function that will be used by `morgan`
 logger.stream = {

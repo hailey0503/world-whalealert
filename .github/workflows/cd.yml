@@ -10,82 +10,51 @@ jobs:
 
   build:
 
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
 
-    steps:
-    - name: Pull Docker image
-      run: sudo docker pull haileythegooner/world-whalealert:latest
-    - name: Delete old Docker container
-      run: sudo docker rm -f world-whalealert-container || true 
-    - name: Generate Environment Variable File for production  
-      run: |
-        echo "DISCORD_WEBHOOK_URL=$DISCORD_WEBHOOK_URL" >> .env.production
-        echo "DISCORD_APP_ID=$DISCORD_APP_ID" >> .env.production
-        echo "DISCORD_PUBLIC_KEY=$DISCORD_PUBLIC_KEY" >> .env.production
-        echo "DISCORD_URL=$DISCORD_URL" >> .env.production
-        echo "DISCORD_TOKEN=$DISCORD_TOKEN" >> .env.production
-        echo "DISCORD_CHANNELID=$DISCORD_CHANNELID" >> .env.production
+    steps:  
+    - name: Deploy to prod
+      uses: appleboy/ssh-action@master
+      id: deploy-prod
+      if: contains(github.ref, 'main')
+      with:
+        host: ${{ secrets.HOST_PROD }} # EC2 퍼블릭 IPv4 DNS
+        username: ec2-user
+        key: ${{ secrets.PRIVATE_KEY }} #.pem private key
+        envs: GITHUB_SHA
+        script: |
+          sudo docker pull haileythegooner/world-whalealert:latest
+          sudo docker rm -f world-whalealert-container || true 
+          sudo docker image prune -f
+          
+          echo "DISCORD_WEBHOOK_URL=${{secrets.DISCORD_WEBHOOK_URL}}" >> .env.ai.production
+          echo "DISCORD_URL=${{secrets.DISCORD_URL}}" >> .env.ai.production
+          echo "DISCORD_TOKEN=${{secrets.DISCORD_TOKEN}}" >> .env.ai.production
+          echo "DISCORD_CHANNELID=${{secrets.DISCORD_CHANNELID}}" >> .env.ai.production
 
-        echo "WSETHURL=$WSETHURL" >> .env.production
 
-        echo "APP_KEY=$APP_KEY" >> .env.production
-        echo "APP_SECRET=$APP_SECRET" >> .env.production
-        echo "BEARER_TOKEN=$BEARER_TOKEN" >> .env.production
-        echo "ACCESS_TOKEN=$ACCESS_TOKEN" >> .env.production
-        echo "ACCESS_SECRET=$ACCESS_SECRET" >> .env.production
-        echo "CLIENT_ID=$CLIENT_ID"  >> .env.production 
-        echo "CLIENT_SECRET=$CLIENT_SECRET"  >> .env.production
-        
-        echo "TELEGRAM_TOKEN=$TELEGRAM_TOKEN" >> .env.production
-        echo "NGROK_SEVER_URL=$NGROK_SEVER_URL" >> .env.production
-      env:
-        DISCORD_WEBHOOK_URL: ${{secrets.DISCORD_WEBHOOK_URL}}
-        DISCORD_APP_ID: ${{secrets.DISCORD_APP_ID}}
-        DISCORD_PUBLIC_KEY: ${{secrets.DISCORD_PUBLIC_KEY}}
-        DISCORD_URL: ${{secrets.DISCORD_URL}}
-        DISCORD_TOKEN: ${{secrets.DISCORD_TOKEN}}
-        DISCORD_CHANNELID : ${{secrets.DISCORD_CHANNELID}}
-
-        WSETHURL: ${{secrets.WSETHURL}}
+          echo "APP_KEY=${{secrets.APP_KEY}}" >> .env.ai.production
+          echo "APP_SECRET=${{secrets.APP_SECRET}}" >> .env.ai.production
+          echo "BEARER_TOKEN=${{secrets.BEARER_TOKEN}}" >> .env.ai.production
+          echo "ACCESS_TOKEN=${{secrets.ACCESS_TOKEN}}" >> .env.ai.production
+          echo "ACCESS_SECRET=${{secrets.ACCESS_SECRET}}" >> .env.ai.production
+          echo "CLIENT_ID=${{secrets.CLIENT_ID}}"  >> .env.ai.production 
+          echo "CLIENT_SECRET=${{secrets.CLIENT_SECRET}}"  >> .env.ai.production
+          
+          echo "TELEGRAM_TOKEN=${{secrets.TELEGRAM_TOKEN}}" >> .env.ai.production
+          echo "NGROK_SEVER_URL=${{secrets.NGROK_SEVER_URL}}" >> .env.ai.production
       
-        APP_KEY: ${{secrets.APP_KEY}}
-        APP_SECRET: ${{secrets.APP_SECRET}}
-        BEARER_TOKEN: ${{secrets.BEARER_TOKEN}}
-        ACCESS_TOKEN: ${{secrets.ACCESS_TOKEN}}
-        ACCESS_SECRET: ${{secrets.ACCESS_SECRET}}
-        CLIENT_ID: ${{secrets.CLIENT_ID}} 
-        CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
+          echo "WSETHURL=${{secrets.WSETHURL}}" >> .env.ai.production
+         
+         
+          sudo docker run --env-file ./.env.ai.production -d -p 8080:8080 --name world-whalealert-container haileythegooner/world-whalealert
 
-        TELEGRAM_TOKEN: ${{secrets.TELEGRAM_TOKEN}}
-
-        NGROK_SEVER_URL: ${{secrets.NGROK_SEVER_URL}}
-       
+      
       
 
-    - name: Run Docker Container
-      env:
-        DISCORD_WEBHOOK_URL: ${{secrets.DISCORD_WEBHOOK_URL}}
-        DISCORD_APP_ID: ${{secrets.DISCORD_APP_ID}}
-        DISCORD_PUBLIC_KEY: ${{secrets.DISCORD_PUBLIC_KEY}}
-        DISCORD_URL: ${{secrets.DISCORD_URL}}
-        DISCORD_TOKEN: ${{secrets.DISCORD_TOKEN}}
-        DISCORD_CHANNELID: ${{secrets.DISCORD_CHANNELID}}
-        
-        wsETHUrl: ${{secrets.WSETHURL}}
-    
-        APP_KEY: ${{secrets.APP_KEY}}
-        APP_SECRET: ${{secrets.APP_SECRET}}
-        BEARER_TOKEN: ${{secrets.BEARER_TOKEN}}
-        ACCESS_TOKEN: ${{secrets.ACCESS_TOKEN}}
-        ACCESS_SECRET: ${{secrets.ACCESS_SECRET}}
-        CLIENT_ID: ${{secrets.CLIENT_ID}} 
-        CLIENT_SECRET: ${{secrets.CLIENT_SECRET}}
 
-        TELEGRAM_TOKEN: ${{secrets.TELEGRAM_TOKEN}}
 
-        NGROK_SEVER_URL: ${{secrets.NGROK_SEVER_URL}}
 
-  
-      run: sudo docker run --env-file ./.env.production -d -p 8080:8080 --name world-whalealert-container haileythegooner/world-whalealert
+
      
       
