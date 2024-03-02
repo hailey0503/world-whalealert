@@ -1,5 +1,6 @@
 require("dotenv").config();
 const ethers = require("ethers");
+const ccxt = require("ccxt");
 const winston = require("./winston.js");
 const { userClient } = require("./twitterClient.js");
 const { sendMessage } = require("./telegram.js");
@@ -22,37 +23,37 @@ const abi = [
 
 const tokens = [
   {
-    name: "$WLD",
+    name: "WLD",
     contractAddress: "0x163f8C2467924be0ae7B5347228CABF260318753",
     threshold: ethers.utils.parseEther("100000"),
   },
   {
-    name: "$RNDR",
+    name: "RNDR",
     contractAddress: "0x6de037ef9ad2725eb40118bb1702ebb27e4aeb24",
     threshold: ethers.utils.parseEther("100000"),
   },
   {
-    name: "$FET",
+    name: "FET",
     contractAddress: "0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85",
     threshold: ethers.utils.parseEther("400000"),
   },
   {
-    name: "$AGIX",
+    name: "AGIX",
     contractAddress: "0x5B7533812759B45C2B44C19e320ba2cD2681b542",
     threshold: ethers.utils.parseEther("400000"),
   },
   {
-    name: "$PAAL",
+    name: "PAAL",
     contractAddress: "0x14fee680690900ba0cccfc76ad70fd1b95d10e16",
     threshold: ethers.utils.parseEther("250000"),
   },
   {
-    name: "$GLM",
+    name: "GLM",
     contractAddress: "0x7DD9c5Cba05E151C895FDe1CF355C9A1D5DA6429",
     threshold: ethers.utils.parseEther("800000"),
   },
   {
-    name: "$ZIG",
+    name: "ZIG",
     contractAddress: "0xb2617246d0c6c0087f18703d576831899ca94f01",
     threshold: ethers.utils.parseEther("6000000"),
   },
@@ -143,12 +144,16 @@ async function onTransfer(from, to, amount, event, whaleThreshold, tokenName) {
       const value = ethers.utils.formatEther(
         rawValue
       )
-      
+      const price  = await getPrice(tokenName)
+      const dollarValue = (price * Number(value)).toLocaleString("en-US", {
+        maximumFractionDigits: 0,
+      }) 
       const refinedValue = Number(value).toLocaleString("en-US", {
         maximumFractionDigits: 0,
-      })
-      console.log("v:", value)
-      const message = `${refinedValue} ${tokenName} is transfered to ${walletToName} from ${walletFromName} ${link}`;
+      }) 
+      
+      //console.log("v:", value)
+      const message = `🚀🚀${refinedValue} $${tokenName} (${dollarValue} USD) is transfered to ${walletToName} from ${walletFromName} ${link}`;
 
       const tweetPromise = tweet(message);
       const telegramPromise = telegram(message);
@@ -174,6 +179,32 @@ function getWalletInfo(address, result) {
   }
   winston.debug("from_wallet_name: " + walletName);
   return walletName;
+}
+
+async function getPrice(symbol) {
+  try {
+    // Create an instance of the Upbit exchange
+    const exchange = new ccxt.binance({ enableRateLimit: true });
+
+    // Fetch ticker data for the specified symbol
+    const formattedSymbol = symbol.toUpperCase() + "/USDT"; // Convert to uppercase and add "/KRW"
+    const ticker = await exchange.fetchTicker(formattedSymbol);
+
+    // Check if the ticker data was successfully fetched
+    if (ticker) {
+      // Extract the current price
+      const currentPrice = ticker.last;
+      console.log("1717", currentPrice);
+      
+      // Return the current price in KRW
+      return currentPrice;
+    } else {
+      throw "Failed to fetch cryptocurrency data";
+    }
+  } catch (error) {
+    console.error("Error:", error.message);
+    return null; // Return null or handle the error as required
+  }
 }
 
 async function tweet(arg) {
