@@ -47,7 +47,7 @@ jobs:
           echo "WSETHURL=${{secrets.WSETHURL}}" >> .env.ai.production
          
          
-          sudo docker run --env-file ./.env.ai.production -d -p 8080:8080 --name world-whalealert-container haileythegooner/world-whalealert
+          sudo docker run --env-file ./.env.ai.production -d -p 8081:8081 --name world-whalealert-container haileythegooner/world-whalealert
 
       
       
