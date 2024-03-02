@@ -20,23 +20,54 @@ const abi = [
   "event Transfer(address indexed from, address indexed to, uint amount)",
 ];
 
-
-const tokens = [{name: "$WLD", contractAddress: "0x163f8C2467924be0ae7B5347228CABF260318753", threshold: ethers.utils.parseEther("100000")},
-{name: "$RNDR", contractAddress: "0x6de037ef9ad2725eb40118bb1702ebb27e4aeb24", threshold: ethers.utils.parseEther("100000")},
-{name: "$FET", contractAddress:"0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85", threshold: ethers.utils.parseEther("500000")}]
-
+const tokens = [
+  {
+    name: "$WLD",
+    contractAddress: "0x163f8C2467924be0ae7B5347228CABF260318753",
+    threshold: ethers.utils.parseEther("100000"),
+  },
+  {
+    name: "$RNDR",
+    contractAddress: "0x6de037ef9ad2725eb40118bb1702ebb27e4aeb24",
+    threshold: ethers.utils.parseEther("100000"),
+  },
+  {
+    name: "$FET",
+    contractAddress: "0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85",
+    threshold: ethers.utils.parseEther("400000"),
+  },
+  {
+    name: "$AGIX",
+    contractAddress: "0x5B7533812759B45C2B44C19e320ba2cD2681b542",
+    threshold: ethers.utils.parseEther("400000"),
+  },
+  {
+    name: "$PAAL",
+    contractAddress: "0x14fee680690900ba0cccfc76ad70fd1b95d10e16",
+    threshold: ethers.utils.parseEther("250000"),
+  },
+  {
+    name: "$GLM",
+    contractAddress: "0x7DD9c5Cba05E151C895FDe1CF355C9A1D5DA6429",
+    threshold: ethers.utils.parseEther("800000"),
+  },
+  {
+    name: "$ZIG",
+    contractAddress: "0xb2617246d0c6c0087f18703d576831899ca94f01",
+    threshold: ethers.utils.parseEther("6000000"),
+  },
+];
 
 async function main() {
   //connectToMongoDB();
   //Initial fetch when the server starts
   ERC20TransferAlert();
-  
+
   setInterval(() => console.log("keepalive"), 60 * 5 * 1000);
 }
 
 async function ERC20TransferAlert() {
- 
- // const network_id_pair = { networkId: "WLD" };
+  // const network_id_pair = { networkId: "WLD" };
   const wsETHUrl = process.env.WSETHURL;
   winston.warn(wsETHUrl);
   const networkId = 1;
@@ -47,29 +78,30 @@ async function ERC20TransferAlert() {
     //diff by tokens
     const EXPECTED_PONG_BACK = 30000;
     const KEEP_ALIVE_CHECK_INTERVAL = 15000;
-    
+
     let pingTimeout = null;
     let keepAliveInterval = null;
     provider._websocket.on("open", () => {
       keepAliveInterval = setInterval(() => {
-        winston.debug("Checking if the WLD connection is alive, sending a ping");
-  
+        winston.debug(
+          "Checking if the WLD connection is alive, sending a ping"
+        );
+
         provider._websocket.ping();
-  
+
         pingTimeout = setTimeout(() => {
           provider._websocket.terminate();
         }, EXPECTED_PONG_BACK);
       }, KEEP_ALIVE_CHECK_INTERVAL);
-  
     });
 
     for (const token of tokens) {
       const erc20 = new ethers.Contract(token.contractAddress, abi, provider);
       erc20.on("Transfer", async (from, to, amount, event) => {
-        onTransfer(from, to, amount, event, token.threshold, token.name); 
+        onTransfer(from, to, amount, event, token.threshold, token.name);
       });
     }
- 
+
     provider._websocket.on("close", () => {
       winston.error("The ETH websocket connection was closed");
       clearInterval(keepAliveInterval);
@@ -90,13 +122,15 @@ async function ERC20TransferAlert() {
 
 async function onTransfer(from, to, amount, event, whaleThreshold, tokenName) {
   try {
-    const value = amount;
+    const rawValue = amount;
+    console.log("type:", typeof(rawValue))
+   
     const txHash = event.transactionHash; //event tx -> console.log
     winston.debug("txhash", txHash);
     winston.debug("thres", whaleThreshold);
-    winston.debug(value.gte(whaleThreshold));
+    winston.debug(rawValue.gte(whaleThreshold));
 
-    if (value.gte(whaleThreshold)) {
+    if (rawValue.gte(whaleThreshold)) {
       winston.debug("gte in");
       const fromAddress = from;
       const toAddress = to;
@@ -106,9 +140,15 @@ async function onTransfer(from, to, amount, event, whaleThreshold, tokenName) {
       //console.log('names',walletFromName, walletToName)
       const link = "https://etherscan.io/tx/" + txHash;
       // console.log('link',link)
-      const message = `${ethers.utils.formatEther(
-        value
-      )} ${tokenName} is transfered to ${walletToName} from ${walletFromName} ${link}`;
+      const value = ethers.utils.formatEther(
+        rawValue
+      )
+      
+      const refinedValue = Number(value).toLocaleString("en-US", {
+        maximumFractionDigits: 0,
+      })
+      console.log("v:", value)
+      const message = `${refinedValue} ${tokenName} is transfered to ${walletToName} from ${walletFromName} ${link}`;
 
       const tweetPromise = tweet(message);
       const telegramPromise = telegram(message);
