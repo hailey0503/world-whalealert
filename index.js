@@ -25,17 +25,17 @@ const tokens = [
   {
     name: "WLD",
     contractAddress: "0x163f8C2467924be0ae7B5347228CABF260318753",
-    threshold: ethers.utils.parseEther("100000"),
+    threshold: ethers.utils.parseEther("500000"),
   },
   {
     name: "RNDR",
     contractAddress: "0x6de037ef9ad2725eb40118bb1702ebb27e4aeb24",
-    threshold: ethers.utils.parseEther("50000"),
+    threshold: ethers.utils.parseEther("500000"),
   },
   {
     name: "FET",
     contractAddress: "0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85",
-    threshold: ethers.utils.parseEther("300000"),
+    threshold: ethers.utils.parseEther("3000000"),
   },
   {
     name: "AGIX",
@@ -50,7 +50,7 @@ const tokens = [
   {
     name: "GLM",
     contractAddress: "0x7DD9c5Cba05E151C895FDe1CF355C9A1D5DA6429",
-    threshold: ethers.utils.parseEther("2000000"),
+    threshold: ethers.utils.parseEther("3000000"),
   },
   {
     name: "ZIG",
@@ -60,7 +60,7 @@ const tokens = [
   {
     name: "GRT",
     contractAddress: "0xc944e90c64b2c07662a292be6244bdf05cda44a7",
-    threshold: ethers.utils.parseEther("1500000"),
+    threshold: ethers.utils.parseEther("10000000"),
   },
 ];
 
