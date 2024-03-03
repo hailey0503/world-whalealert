@@ -50,7 +50,7 @@ const tokens = [
   {
     name: "GLM",
     contractAddress: "0x7DD9c5Cba05E151C895FDe1CF355C9A1D5DA6429",
-    threshold: ethers.utils.parseEther("800000"),
+    threshold: ethers.utils.parseEther("2000000"),
   },
   {
     name: "ZIG",
