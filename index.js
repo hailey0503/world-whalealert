@@ -71,7 +71,7 @@ async function main() {
 
   setInterval(() => console.log("keepalive"), 60 * 5 * 1000);
 }
-ff
+
 async function ERC20TransferAlert() {
   // const network_id_pair = { networkId: "WLD" };
   const wsETHUrl = process.env.WSETHURL;
