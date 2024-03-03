@@ -57,6 +57,11 @@ const tokens = [
     contractAddress: "0xb2617246d0c6c0087f18703d576831899ca94f01",
     threshold: ethers.utils.parseEther("4000000"),
   },
+  {
+    name: "GRT",
+    contractAddress: "0xc944e90c64b2c07662a292be6244bdf05cda44a7",
+    threshold: ethers.utils.parseEther("1500000"),
+  },
 ];
 
 async function main() {
@@ -66,7 +71,7 @@ async function main() {
 
   setInterval(() => console.log("keepalive"), 60 * 5 * 1000);
 }
-
+ff
 async function ERC20TransferAlert() {
   // const network_id_pair = { networkId: "WLD" };
   const wsETHUrl = process.env.WSETHURL;
