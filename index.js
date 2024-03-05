@@ -25,43 +25,74 @@ const tokens = [
   {
     name: "WLD",
     contractAddress: "0x163f8C2467924be0ae7B5347228CABF260318753",
-    threshold: ethers.utils.parseEther("300000"),
+    threshold: ethers.utils.parseEther("500000"),
   },
   {
     name: "RNDR",
     contractAddress: "0x6de037ef9ad2725eb40118bb1702ebb27e4aeb24",
-    threshold: ethers.utils.parseEther("400000"),
+    threshold: ethers.utils.parseEther("1000000"),
   },
   {
     name: "FET",
     contractAddress: "0xaea46A60368A7bD060eec7DF8CBa43b7EF41Ad85",
-    threshold: ethers.utils.parseEther("2000000"),
+    threshold: ethers.utils.parseEther("5000000"),
   },
   {
     name: "AGIX",
     contractAddress: "0x5B7533812759B45C2B44C19e320ba2cD2681b542",
-    threshold: ethers.utils.parseEther("200000"),
+    threshold: ethers.utils.parseEther("20"),
   },
   {
     name: "PAAL",
     contractAddress: "0x14fee680690900ba0cccfc76ad70fd1b95d10e16",
-    threshold: ethers.utils.parseEther("100000"),
+    threshold: ethers.utils.parseEther("100"),
   },
   {
     name: "GLM",
     contractAddress: "0x7DD9c5Cba05E151C895FDe1CF355C9A1D5DA6429",
-    threshold: ethers.utils.parseEther("3000000"),
+    threshold: ethers.utils.parseEther("4000000"),
   },
   {
     name: "ZIG",
     contractAddress: "0xb2617246d0c6c0087f18703d576831899ca94f01",
-    threshold: ethers.utils.parseEther("3000000"),
+    threshold: ethers.utils.parseEther("10000000"),
   },
   {
     name: "GRT",
     contractAddress: "0xc944e90c64b2c07662a292be6244bdf05cda44a7",
-    threshold: ethers.utils.parseEther("10000000"),
+    threshold: ethers.utils.parseEther("11532658"),
   },
+  {
+    name: "ROSE",
+    contractAddress: "0x26B80FBfC01b71495f477d5237071242e0d959d7",
+    threshold: ethers.utils.parseEther("5000000"),
+  },
+  {
+    name: "OCEAN",
+    contractAddress: "0x967da4048cd07ab37855c090aaf366e4ce1b9f48",
+    threshold: ethers.utils.parseEther("1000000"),
+  },
+  {
+    name: "PRIME",
+    contractAddress: "0xb23d80f5fefcddaa212212f028021b41ded428cf",
+    threshold: ethers.utils.parseEther("100000"),
+  },
+  {
+    name: "RLC",
+    contractAddress: "0x607f4c5bb672230e8672085532f7e901544a7375",
+    threshold: ethers.utils.parseEther("100"),
+  },
+  {
+    name: "ORAI",
+    contractAddress: "0x4c11249814f11b9346808179cf06e71ac328c1b5",
+    threshold: ethers.utils.parseEther("300000"),
+  },
+  {
+    name: "ARKM",
+    contractAddress: "0x6e2a43be0b1d33b726f0ca3b8de60b3482b8b050",
+    threshold: ethers.utils.parseEther("400000"),
+  }
+  
 ];
 
 async function main() {
@@ -129,8 +160,8 @@ async function ERC20TransferAlert() {
 async function onTransfer(from, to, amount, event, whaleThreshold, tokenName) {
   try {
     const rawValue = amount;
-    console.log("type:", typeof(rawValue))
-   
+    console.log("type:", typeof rawValue);
+
     const txHash = event.transactionHash; //event tx -> console.log
     winston.debug("txhash", txHash);
     winston.debug("thres", whaleThreshold);
@@ -146,25 +177,42 @@ async function onTransfer(from, to, amount, event, whaleThreshold, tokenName) {
       //console.log('names',walletFromName, walletToName)
       const link = "https://etherscan.io/tx/" + txHash;
       // console.log('link',link)
-      const value = ethers.utils.formatEther(
-        rawValue
-      )
-      const price  = await getPrice(tokenName)
+      const value = ethers.utils.formatEther(rawValue);
+      // Assuming tokenName is defined somewhere before this point
+      let price;
+     
+      try {
+        // Call getPrice function
+        const { currentPrice } = await getPrice(
+          tokenName
+        );
+        price = currentPrice;
+        
+
+        // Use the retrieved values
+        console.log("Current Price:", price);
+      
+
+        // Continue with your code
+      } catch (error) {
+        console.error("Error:", error.message);
+      }
+
       const dollarValue = (price * Number(value)).toLocaleString("en-US", {
         maximumFractionDigits: 0,
-      }) 
+      });
       const refinedValue = Number(value).toLocaleString("en-US", {
         maximumFractionDigits: 0,
-      }) 
-      
-      //console.log("v:", value)
+      });
+
       const message = `
-        🚀🚀${refinedValue} $${tokenName} (${dollarValue} USD) is transfered to ${walletToName} from ${walletFromName}
+        🚀🚀${refinedValue} $${tokenName} (${dollarValue} USD) is transferred to ${walletToName} from ${walletFromName}
 
-🤖 #AI #WLD #GRT #RNDR #FET #AGIX #PAAL #ZIG #GLM        
-      ${link} 
-      `;
+#CurrentPrice: $${price} 
 
+🤖 #AI #WLD #GRT #RNDR #FET #AGIX #PAAL #ZIG #GLM #ROSE #OCEAN #ARKM #RLC #PRIME #TRAC #ORAI    
+    ${link} `;
+console.log(message)
       const tweetPromise = tweet(message);
       const telegramPromise = telegram(message);
       const discordPromise = discord(message);
@@ -193,23 +241,33 @@ function getWalletInfo(address, result) {
 
 async function getPrice(symbol) {
   try {
-    // Create an instance of the Upbit exchange
-    const exchange = new ccxt.binance({ enableRateLimit: true });
-
+    // Create an instance of the Binance exchange
+    let exchange
+    if (symbol === "ZIG" || symbol === "PRIME") {
+      exchange = new ccxt.bybit({ enableRateLimit: true });
+    } else if (symbol === "TRAC" || symbol === "ORAI") {
+      exchange = new ccxt.kucoin({ enableRateLimit: true });
+    } else {
+      exchange = new ccxt.binance({ enableRateLimit: true });
+    }
     // Fetch ticker data for the specified symbol
-    const formattedSymbol = symbol.toUpperCase() + "/USDT"; // Convert to uppercase and add "/KRW"
+    const formattedSymbol = symbol.toUpperCase() + "/USDT";
     const ticker = await exchange.fetchTicker(formattedSymbol);
 
     // Check if the ticker data was successfully fetched
     if (ticker) {
-      // Extract the current price
+      // Fetch OHLCV data for the specified symbol (1-hour timeframe)
       const currentPrice = ticker.last;
-      console.log("1717", currentPrice);
-      
-      // Return the current price in KRW
-      return currentPrice;
+
+      console.log("Current Price:", symbol, currentPrice);
+     
+      // Return the current price and price differences
+      return {
+        currentPrice: currentPrice,
+       
+      };
     } else {
-      throw "Failed to fetch cryptocurrency data";
+      throw new Error("Failed to fetch cryptocurrency data");
     }
   } catch (error) {
     console.error("Error:", error.message);
