@@ -70,7 +70,7 @@ const tokens = [
   {
     name: "OCEAN",
     contractAddress: "0x967da4048cd07ab37855c090aaf366e4ce1b9f48",
-    threshold: ethers.utils.parseEther("1000000"),
+    threshold: ethers.utils.parseEther("2000000"),
   },
   {
     name: "PRIME",
