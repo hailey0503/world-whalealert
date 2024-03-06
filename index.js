@@ -25,7 +25,7 @@ const tokens = [
   {
     name: "WLD",
     contractAddress: "0x163f8C2467924be0ae7B5347228CABF260318753",
-    threshold: ethers.utils.parseEther("300000"),
+    threshold: ethers.utils.parseEther("1000000"),
   },
   {
     name: "RNDR",
@@ -70,7 +70,7 @@ const tokens = [
   {
     name: "OCEAN",
     contractAddress: "0x967da4048cd07ab37855c090aaf366e4ce1b9f48",
-    threshold: ethers.utils.parseEther("2000000"),
+    threshold: ethers.utils.parseEther("3000000"),
   },
   {
     name: "PRIME",
@@ -90,7 +90,7 @@ const tokens = [
   {
     name: "ARKM",
     contractAddress: "0x6e2a43be0b1d33b726f0ca3b8de60b3482b8b050",
-    threshold: ethers.utils.parseEther("400000"),
+    threshold: ethers.utils.parseEther("1000000"),
   }
   
 ];
