@@ -210,7 +210,7 @@ async function onTransfer(from, to, amount, event, whaleThreshold, tokenName) {
 
 #CurrentPrice: $${price} 
 
-🤖 #AI #WLD #GRT #RNDR #FET #AGIX #PAAL #ZIG #GLM #ROSE #OCEAN #ARKM #RLC #PRIME #TRAC #ORAI    
+🤖 #AI #WLD #GRT #RNDR #FET #AGIX #PAAL #ZIG #GLM  
     ${link} `;
 console.log(message)
       const tweetPromise = tweet(message);
