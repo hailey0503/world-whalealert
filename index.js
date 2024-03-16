@@ -278,7 +278,7 @@ const tokens = [
   {
     name: "PRIME",
     contractAddress: "0xb23d80f5fefcddaa212212f028021b41ded428cf",
-    threshold: ethers.utils.parseEther("100000"),
+    threshold: ethers.utils.parseEther("400000"),
   },
   {
     name: "RLC",
