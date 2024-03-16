@@ -1,12 +1,215 @@
 require("dotenv").config();
 const ethers = require("ethers");
 const ccxt = require("ccxt");
+const axios = require('axios');
+const cron = require('node-cron');
 const winston = require("./winston.js");
 const { userClient } = require("./twitterClient.js");
 const { sendMessage } = require("./telegram.js");
 const { discordClient, sendDiscordMessage } = require("./discord.js");
 const fs = require("fs");
 const result = JSON.parse(fs.readFileSync("./data/accountLabels.json"));
+
+const apiKey = process.env.COINMARKETCAP_KEY;
+
+// ds to store mc and v [{total: [mc, vol], ai: [mc, vol]}]
+let marketData = {
+  total:[],
+  ai: []
+}
+
+// ds to store each token data
+let coindata = []
+
+// Function to fetch AI rankings and update data structures
+async function fetchAIRankings() {
+  try {
+    const categoryId = "6051a81a66fc1b42617d6db7"; // Category ID for "AI & Big Data"
+    const response = await axios.get(`https://pro-api.coinmarketcap.com/v1/cryptocurrency/category?id=${categoryId}`, {
+      headers: {
+        'X-CMC_PRO_API_KEY': apiKey
+      }
+    });
+
+    const data = response.data.data
+    console.log(JSON.stringify(data, null, 2).substring(0, 1000));
+   
+    marketData.ai.push({
+      ai_market_cap: data["market_cap"],
+      ai_volume: data["volume"]
+    });
+
+    coindata = data.coins.map(coin => ({
+      name: coin.name,
+      cmcRank: coin.cmc_rank,
+      price: coin.quote.USD.price
+    }));
+
+   // console.log("coin", coindata)
+ 
+    console.log("AI Market Data", marketData);
+    
+    return { coindata, marketData};
+  } catch (error) {
+    console.error('Error fetching sector rankings:', error);
+    return null;
+  }
+}
+fetchAIRankings() 
+
+
+// Function to fetch total market data and update marketData.total
+async function fetchTotalData() {
+  try {
+      const response = await axios.get('https://pro-api.coinmarketcap.com/v1/global-metrics/quotes/latest', {
+          headers: {
+              'X-CMC_PRO_API_KEY': apiKey,
+          },
+      });
+      const data = response.data.data;
+      const totalMarketCap = data.quote.USD.total_market_cap;
+      const totalVolume = data.quote.USD.total_volume_24h;
+
+      marketData.total.push({
+        total_market_cap: totalMarketCap,
+        total_volume: totalVolume 
+      });
+
+      console.log('Total Market data', marketData);
+    
+      return marketData
+  } catch (error) {
+      console.error('Error fetching global metrics:', error);
+      return null;
+  }
+}
+// Function to calculate percentage change
+function calculatePercentageChange(previousValue, currentValue) {
+  return ((currentValue - previousValue) / previousValue) * 100;
+}
+
+let rankMsg = ""
+// Function to detect rank changes and tweet about them
+function detectRankChanges(previousCoindata, currentCoindata) {
+  previousCoindata.forEach((previousCoin, index) => {
+    const currentCoin = currentCoindata[index];
+    if (previousCoin.name === currentCoin.name && previousCoin.cmcRank > currentCoin.cmcRank) {
+      if (currentCoin.cmcRank < 100 || previousCoin.cmcRank - currentCoin.cmcRank > 20) {
+      // Tweet about the rank change
+      rankMsg = `🎉🎉Rank up detected for ${currentCoin.name}: ${previousCoin.cmcRank} -> ${currentCoin.cmcRank}`
+      console.log(rankMsg);
+      // You can tweet this information using your Twitter API
+      }
+    }
+  });
+}
+
+let pumpMsg = ""
+function tweetPricePumps(coins) {
+  coins.forEach(coin => {
+      if (coin.price) {
+          // Calculate price increase percentage
+          const priceIncreasePercentage = ((coin.price - coin.previousPrice) / coin.previousPrice) * 100;
+
+          // Check if price increase is 20% or more
+          if (priceIncreasePercentage >= 30) {
+              // Tweet about the price pump
+              pumpMsg = `🔥🔥Price pump detected for ${coin.symbol}: ${priceIncreasePercentage.toFixed(2)}%`
+              console.log(pumpMsg);
+              // You can tweet this information using your Twitter API
+          }
+      }
+  });
+}
+
+
+
+
+let previousTopCoins = [];
+let historic_mc_vol_percentage = []
+let mcMsg = ""
+let volMsg = ""
+// Function to run the process
+async function runProcess() {
+  try {
+    // Fetch current coindata
+    const { coindata: currentTopCoins, marketData } = await fetchAIRankings();
+    const totalData = await fetchTotalData();
+
+    // Detect rank changes and tweet about them
+    detectRankChanges(previousTopCoins, currentTopCoins);
+
+    // Check for coins with price increase of 20% or more and tweet about them
+    tweetPricePumps(currentTopCoins);
+
+    // Update previousTopCoins for next iteration
+    previousTopCoins = currentTopCoins;
+
+     // Calculate percentage of AI market cap and volume out of total market cap and volume
+    const aiMarketCapPercentage = (marketData.ai[marketData.ai.length - 1].ai_market_cap / totalData.total[totalData.total.length - 1].total_market_cap) * 100;
+    const aiVolumePercentage = (marketData.ai[marketData.ai.length - 1].ai_volume / totalData.total[totalData.total.length - 1].total_volume) * 100;
+    historic_mc_vol_percentage.push([aiMarketCapPercentage, aiVolumePercentage])
+    // Tweet about the percentage change in AI market cap and volume
+    let message_mc = ""
+    let message_vol = ""
+    let prev_mc = historic_mc_vol_percentage[historic_mc_vol_percentage.length - 1][0]
+    if (aiMarketCapPercentage > prev_mc) {
+      const up = (aiMarketCapPercentage - prev_mc) / prev_mc
+      message_mc = `Up ${up}%`
+    }
+    let prev_vol = historic_mc_vol_percentage[historic_mc_vol_percentage.length - 1][1]
+    if (aiVolumePercentage > prev_vol) {
+      const up = (aiVolumePercentage - prev_vol) / prev_vol
+      message_vol = `Up ${up}%`
+    }
+    mcMsg = `🦾Percentage of AI #MarketCap out of Total MC: ${aiMarketCapPercentage.toFixed(2)}% ${message_mc}`
+    console.log(mcMsg);
+    volMsg = `🦾Percentage of AI #Volume out of Total Vol: ${aiVolumePercentage.toFixed(2)}% ${message_vol}`
+    console.log(volMsg);
+    const msgForTweet = `
+
+    ${mcMsg} 
+
+${volMsg}
+
+${pumpMsg}
+
+${rankMsg}
+
+
+🤖 #AI #WLD #GRT #RNDR #FET #AGIX #PAAL #ZIG #GLM  
+`;
+    console.log(msgForTweet)
+    tweet(msgForTweet)
+    // You can tweet this information using your Twitter API
+  } catch (error) {
+    console.error('Error:', error);
+  }
+}
+
+// Run the process every 6 hours
+setInterval(runProcess,  6 * 60 * 60 * 1000);
+/*
+// get id of target cagetory
+async function categories() {
+  const response = await axios.get(`https://pro-api.coinmarketcap.com/v1/cryptocurrency/categories`, {
+          headers: {
+              'X-CMC_PRO_API_KEY': apiKey
+          }
+      });
+     const data = response.data["data"]
+     console.log("data", data)
+    for (const item of data) {
+        if (item.name==="AI & Big Data") {
+            console.log("ID:", item.id);
+            break; // Exit loop once the item is found
+        }
+    }
+    
+      //console.log( response.data);
+}
+categories()
+*/
 
 const abi = [
   // Read-Only Functions
