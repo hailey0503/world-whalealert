@@ -45,6 +45,7 @@ jobs:
           echo "NGROK_SEVER_URL=${{secrets.NGROK_SEVER_URL}}" >> .env.ai.production
       
           echo "WSETHURL=${{secrets.WSETHURL}}" >> .env.ai.production
+          echo "COINMARKETCAP_KEY=${{secrets.COINMARKETCAP_KEY}}" >> .env.ai.production
          
          
           sudo docker run --env-file ./.env.ai.production -d -p 8081:8081 --name world-whalealert-container haileythegooner/world-whalealert
