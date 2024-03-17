@@ -45,7 +45,7 @@ async function fetchAIRankings() {
       price: coin.quote.USD.price
     }));
 
-   // console.log("coin", coindata)
+    console.log("coin", coindata)
  
     console.log("AI Market Data", marketData);
     
@@ -56,6 +56,7 @@ async function fetchAIRankings() {
   }
 }
 fetchAIRankings() 
+fetchTotalData()
 
 
 // Function to fetch total market data and update marketData.total
