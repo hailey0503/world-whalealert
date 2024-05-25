@@ -20,6 +20,9 @@ let marketData = {
 
 // ds to store each token data
 let coindata = []
+let previousTopCoins = [];
+let historic_mc_vol_percentage = [];
+let allTimeHigh = new Map();
 
 // Function to fetch AI rankings and update data structures
 async function fetchAIRankings() {
@@ -125,9 +128,6 @@ function tweetPricePumps(coins) {
 
 
 
-
-let previousTopCoins = [];
-let historic_mc_vol_percentage = []
 let mcMsg = ""
 let volMsg = ""
 // Function to run the process
@@ -153,16 +153,18 @@ async function runProcess() {
     // Tweet about the percentage change in AI market cap and volume
     let message_mc = ""
     let message_vol = ""
-    let prev_mc = historic_mc_vol_percentage[historic_mc_vol_percentage.length - 1][0]
+    if (historic_mc_vol_percentage.length >= 2 ) {
+    let prev_mc = historic_mc_vol_percentage[historic_mc_vol_percentage.length - 2][0]
     if (aiMarketCapPercentage > prev_mc) {
       const up = (aiMarketCapPercentage - prev_mc) / prev_mc
       message_mc = `Up ${up}%`
     }
-    let prev_vol = historic_mc_vol_percentage[historic_mc_vol_percentage.length - 1][1]
+    let prev_vol = historic_mc_vol_percentage[historic_mc_vol_percentage.length - 2][1]
     if (aiVolumePercentage > prev_vol) {
       const up = (aiVolumePercentage - prev_vol) / prev_vol
       message_vol = `Up ${up}%`
     }
+  }
     mcMsg = `🦾Percentage of AI #MarketCap out of Total MC: ${aiMarketCapPercentage.toFixed(2)}% ${message_mc}`
     console.log(mcMsg);
     volMsg = `🦾Percentage of AI #Volume out of Total Vol: ${aiVolumePercentage.toFixed(2)}% ${message_vol}`
@@ -189,7 +191,7 @@ ${rankMsg}
 }
 
 // Run the process every 6 hours
-setInterval(runProcess,  6 * 60 * 60 * 1000);
+setInterval(runProcess,   60 * 1000);
 /*
 // get id of target cagetory
 async function categories() {
