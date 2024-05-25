@@ -191,7 +191,7 @@ ${rankMsg}
 }
 
 // Run the process every 6 hours
-setInterval(runProcess,   60 * 1000);
+setInterval(runProcess,   6* 60* 60 * 1000);
 /*
 // get id of target cagetory
 async function categories() {
