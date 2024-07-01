@@ -115,7 +115,7 @@ function tweetPricePumps(coins) {
           // Calculate price increase percentage
           const priceIncreasePercentage = ((coin.price - coin.previousPrice) / coin.previousPrice) * 100;
 
-          // Check if price increase is 20% or more
+          // Check if price increase is 30% or more
           if (priceIncreasePercentage >= 30) {
               // Tweet about the price pump
               pumpMsg = `🔥🔥Price pump detected for ${coin.symbol}: ${priceIncreasePercentage.toFixed(2)}%`
